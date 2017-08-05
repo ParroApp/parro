@@ -33,6 +33,7 @@ class Code extends React.Component {
 		this.setState({
 			code: newCode
 		});
+		this.props.newCode(newCode);
     console.log(this.state.code);
 	}
 
@@ -50,10 +51,26 @@ class Code extends React.Component {
 		}, () => this.refs.editor.focus());
 	}
 
-  handleSubmit(code, language) {
+  runCode(code, language) {
 		console.log('here');
 		var self = this;
-	console.log('THIS.STATE', this.state);
+    axios.post('http://localhost:3000/run_code', {
+			code: code,
+			language: language,
+			questionId: this.state.questionId
+		}).then(function(resp) {
+			console.log('self', self);
+			console.log('resp', resp);
+			self.props.makeMessage(resp);
+		})
+		.catch(err => {
+			console.log(err);
+		})
+  }
+
+	handleSubmit(code, language) {
+		console.log('here');
+		var self = this;
     axios.post('http://localhost:3000/run_code', {
 			code: code,
 			language: language,
@@ -98,7 +115,7 @@ class Code extends React.Component {
 									<option value="python">Python</option>
 					      </select>
 					    </div>
-							<button onClick={() => (this.handleSubmit(this.state.code, 'javascript'))} className="button is-primary">
+							<button onClick={() => (this.runCode(this.state.code, 'javascript'))} className="button is-primary">
 								<span className="icon">
 									<i className="fa fa-code"></i>
 								</span>
