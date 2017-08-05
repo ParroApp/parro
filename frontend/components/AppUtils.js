@@ -19,25 +19,25 @@ export function takePhoto(video) {
 };
 
 export function uploadImage(photoEncoding, userId) {
-  var blob = dataURItoBlob(photoEncoding);
-  var formData = new FormData();
-  formData.append('image', blob, `${new Date().toISOString()}-${userId}.png`);
-
-  axios.post('/upload_image', formData)
-  .then(function(res) {
-    console.log(res);
-  })
-  .catch(function(err) {
-    console.log('ERROR', err);
-  });
+//   var blob = dataURItoBlob(photoEncoding);
+//   var formData = new FormData();
+//   formData.append('content', blob, `${new Date().toISOString()}-${userId}.png`);
+//
+//   axios.post('/upload', formData)
+//   .then(function(res) {
+//     console.log(res);
+//   })
+//   .catch(function(err) {
+//     console.log('ERROR', err);
+//   });
 };
 
 export function uploadAudio(audioBlob, userId, questionNum) {
   var formData = new FormData();
   console.log(audioBlob);
-  formData.append('audio', audioBlob, `Q${questionNum}_${userId}_${new Date().toISOString()}.wav`);
+  formData.append('content', audioBlob, `Q${questionNum}_${userId}_${new Date().toISOString()}.wav`);
 
-  axios.post('/upload_audio', formData)
+  axios.post('/upload', formData)
   .then(function(res) {
     console.log(res);
   })

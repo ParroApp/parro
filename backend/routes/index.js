@@ -12,6 +12,8 @@ const router = express.Router();
 const upload = multer();
 const s3 = new aws.S3();
 
+console.log('AXIOS', axios);
+
 router.post('/upload', upload.single('content'), (req, res) => {
   if (!req.body.sessionId) {
     return res.status(403).json({ error: 'Invalid session id.' });
@@ -47,9 +49,10 @@ router.post('/upload', upload.single('content'), (req, res) => {
 });
 
 router.post('/merge', function(req, res, next) {
-
   // merge audio files -- don't necessarily need to be in order, right?
   // also be sure that these files are in .wav form
+  // grab all Amazon .wav s
+  s3.findById()
   ffmpeg()
   .input('./backend/uploads/pics/caea3efe05f366b6619fddc55e769f12.wav')
   .input('./backend/uploads/pics/0046f56e0132783a11479f1e7df32c8b.wav')
@@ -63,6 +66,8 @@ router.post('/merge', function(req, res, next) {
     res.send();
     audioAnalytics(`./backend/temp/merged_${req.body.userId}.wav`, (result) => {
       console.log('WATSON RESULTS MERGED', result);
+      // sotré in mongo stringified
+      // clear the file
     });
   })
   .mergeToFile(`./backend/temp/merged_${req.body.userId}.wav`);
@@ -123,7 +128,7 @@ router.post('/run_code', function(req, res) {
     var outputArr = foundQuestion.outputArr;
     var answerArr = [];
     var token = 'cd23c271-8018-420f-a556-f92402987134';
-    var axios = _axios.create({
+    var _axios = axios.create({
       headers: {
         Authorization: 'Token ' + token
       }
@@ -131,7 +136,7 @@ router.post('/run_code', function(req, res) {
     console.log('INPUTARRONE', inputArr);
     inputArr.forEach(function(input) {
       console.log('INPUT', input);
-      answerArr.push(axios.post('https://run.glot.io/languages/javascript/latest', {
+      answerArr.push(_axios.post('https://run.glot.io/languages/javascript/latest', {
         files: [
           {
             name: "main.js",
