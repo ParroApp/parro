@@ -58,6 +58,36 @@ router.post('/upload_audio', upload.single('audio'), function (req, res, next) {
   });
 });
 
+router.post('/send/demo/email', function(req, res) {
+  var { name, email } = req.body;
+
+  new Interview({
+    name, email
+  }).save()
+  .then(interview => {
+    res.json(interview);
+  })
+  .catch(err => {
+    res.json(interview);
+  })
+
+});
+
+router.post('/createQuestion', function(req, res) {
+  var inputArr = req.body.inputArr;
+  var outputArr = req.body.outputArr;
+  var question = req.body.question;
+
+  new Question({
+    inputArr,
+    outputArr,
+    question
+  }).save()
+  .then(question => {
+    res.json(question);
+  })
+});
+
 router.post('/run_code', function(req, res) {
   var questionId = req.body.questionId;
   var code = req.body.code;

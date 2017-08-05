@@ -39,13 +39,15 @@ class Technical extends React.Component {
       recording: false,
       minutes: 15,
       seconds: 0,
-      interval: ''
+      interval: '',
+      code: ''
     }
     this.makeMessage = this.makeMessage.bind(this);
     this.closeToast = this.closeToast.bind(this);
     this.nextQuestion = this.nextQuestion.bind(this);
     this.goToQuestions = this.goToQuestions.bind(this);
     this.decrement = this.decrement.bind(this);
+    this.newCode = this.newCode.bind(this);
   }
 
   componentDidMount() {
@@ -90,16 +92,84 @@ class Technical extends React.Component {
   }
   nextQuestion() {
     // SEND THE RESPONSE
+    var minutes = this.state.minutes
+    var seconds = this.state.seconds
+    axios.post('http://localhost:3000/run_code', {
+			code: this.state.code,
+			language: 'javascript',
+			questionId: this.state.curQuestionID
+		}).then(function(resp) {
+			if (resp.data.success) {
+        axios.post('/tech/question1', {
+          minutes,
+          seconds,
+          correct: true
+        })
+        .then((resp)=> {
+          console.log(resp);
+        })
+      } else {
+        axios.post('/tech/question1', {
+          minutes,
+          seconds,
+          correct: false
+        })
+        .then((resp)=> {
+          console.log(resp);
+        })
+      }
+		})
+		.catch(err => {
+			console.log(err);
+		})
     // KILL THE TIMER
     this.setState({curQ: false, notLastQ: false, minutes: 30, seconds: 0})
-    // setTimeout(() => {
-    //
-    // }, 900000 * 2)
+
   }
   goToQuestions() {
-    // this.props.history.push("/question");
+    var minutes = this.state.minutes
+    var seconds = this.state.seconds
+
+    axios.post('http://localhost:3000/run_code', {
+			code: this.state.code,
+			language: 'javascript',
+			questionId: this.state.curQuestionID
+		}).then(function(resp) {
+			if (resp.data.success) {
+        axios.post('/tech/question2', {
+          minutes,
+          seconds,
+          correct: true
+        })
+        .then((resp)=> {
+          console.log(resp);
+        })
+      } else {
+        axios.post('/tech/question2', {
+          minutes,
+          seconds,
+          correct: false
+        })
+        .then((resp)=> {
+          console.log(resp);
+        })
+      }
+		})
+		.catch(err => {
+			console.log(err);
+		})
+
     window.location = '/question';
   }
+
+
+  newCode(newCode) {
+		this.setState({
+			code: newCode
+		});
+    console.log(this.state.code);
+	}
+
   handleClick() {
     if (!this.state.recording) {
       captureUserMedia((stream) => {
@@ -151,7 +221,6 @@ class Technical extends React.Component {
     this.setState({toast: false})
   }
   render() {
-    console.log(this.state);
     return(
       <div className="container is-fluid" onKeyPress={(e) => { console.log(e); }}>
         <Navbar {...this.props}/>
@@ -167,7 +236,7 @@ class Technical extends React.Component {
               <p className="subtitle is-4">Given a string, you need to reverse the
                 order of characters in each word within a sentence while still preserving whitespace and initial word order.</p>
               </div>
-            <Code makeMessage={this.makeMessage} questionId="597dc6d1a2340df255b085aa"/>
+            <Code newCode={this.newCode} makeMessage={this.makeMessage} questionId="597dc6d1a2340df255b085aa"/>
             </div>
             :
             <div>
@@ -177,7 +246,7 @@ class Technical extends React.Component {
                   by adding characters in front of it. Find and return the shortest palindrome you can find by performing
                   this transformation.</p>
                 </div>
-            <Code makeMessage={this.makeMessage} questionId="597dc6b7a2340df255b085a9"/>
+            <Code newCode={this.newCode} makeMessage={this.makeMessage} questionId="597dc6b7a2340df255b085a9"/>
             </div>
         }
         <div style={{height: '30px', width: '100%'}}></div>
