@@ -1,6 +1,4 @@
 import React from 'react';
-// import '../assets/stylesheets/base.scss';
-// import 'bulma/css/bulma.css';
 import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend} from 'recharts';
 
 const clarity = [
