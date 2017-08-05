@@ -86,8 +86,8 @@ class BusinessLanding extends React.Component {
            <span> DEMO IT NOW</span></button>
           <div style={{height: '50px', width: '100%'}}></div>
 
-          {this.state.open ?
-            <div style={{width: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}}>
+          {this.state.open &&
+            (<div style={{width: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}}>
               <div className="field">
                 <div className="control has-icons-left">
                   <input className="input is-danger is-medium" type="text"
@@ -107,13 +107,11 @@ class BusinessLanding extends React.Component {
                   </span>
                 </div>
               </div>
-              {this.state.error && <p className="is-danger">Please enter valid name and email.</p>}
+              {this.state.error && (<div><p className="is-danger">⚠️ Please enter valid name and email.</p> <div style={{height: '5px', width: '100%'}}></div></div>)}
               <div className="control">
                 <button className="button is-danger is-medium" onClick={this.onSubmit}>Submit</button>
               </div>
-            </div>
-
-             : ''}
+            </div>)}
           {this.state.complete &&
             <div>
               <p className="title is-4">🚀 Please check your email for a link to the demo.</p>
