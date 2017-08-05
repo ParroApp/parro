@@ -2,58 +2,9 @@ var SpeechToTextV1 = require('watson-developer-cloud/speech-to-text/v1');
 var fs = require('fs');
 
 var speech_to_text = new SpeechToTextV1({
-  username: 'USER',
-  password: 'PASS'
+  username: process.env.WATSON_USERNAME,
+  password: process.env.WATSON_PASSWORD,
 });
-
-// var params = {
-//   // From file
-//   audio: fs.createReadStream(file),
-//   content_type: 'audio/flac',
-//   word_confidence: true,
-//   timestamps: true,
-//   keywords: ['Like', 'You Know', 'Actually', 'I Mean', 'Sort of', 'Kind Of', 'Right', 'Uh', 'Um', 'Uhm'],
-//   keywords_threshold: 0.5,
-//   profanity_filter: true
-// };
-
-// 'continuous',
-//   'max_alternatives',
-//   'word_alternatives_threshold',
-
-// speech_to_text.recognize(params, function(err, res) {
-//   if (err)
-//     console.log(err);
-//   else
-//     fs.writeFile('./data.json', JSON.stringify(res));
-//     var analytics = {
-//       pauses: calculatePauses(res),
-//       wordFrequency: wordCount(res),
-//       speed: speakerSpeed(res),
-//       clarity: calculateClarity(res),
-//       duration: calculateDuration(res)
-//     }
-//     console.log(JSON.stringify(analytics, null, 2));
-// });
-
-// var res = JSON.parse(fs.readFileSync('./data.json'));
-// console.log(JSON.stringify(res, null, 2));
-//
-// var analytics = {
-  // pauses: calculatePauses(res),
-  // wordFrequency: wordCount(res),
-  // speed: speakerSpeed(res),
-  // clarity: calculateClarity(res),
-  // duration: calculateDuration(res),
-  // cursingCount: cursingCount(res)
-// }
-// console.log(JSON.stringify(analytics, null, 2));
-
-// // or streaming
-// fs.createReadStream('./resources/speech.wav')
-//   .pipe(speech_to_text.createRecognizeStream({ content_type: 'audio/l16; rate=44100' }))
-//   .pipe(fs.createWriteStream('./transcription.txt'));
-
 
 module.exports = function(file, cb) {
 
@@ -204,21 +155,4 @@ module.exports = function(file, cb) {
     })
     return cursingCount;
   }
-
-  // const ToneAnalyzerV3 = require('watson-developer-cloud/tone-analyzer/v3');
-  //
-  // const tone_analyzer = new ToneAnalyzerV3({
-  //     username: 'USER',
-  //   password: 'PASS',
-  //   version_date: '2016-10-19'
-  // });
-  //
-  // tone_analyzer.tone({ text: 'I am amazing and you suck' }, function(err, tone) {
-  //   if (err) {
-  //     console.log(err);
-  //   } else {
-  //     console.log('tone endpoint:');
-  //     console.log(JSON.stringify(tone, null, 2));
-  //   }
-  // });
 }

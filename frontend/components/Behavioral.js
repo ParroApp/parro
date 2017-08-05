@@ -3,7 +3,7 @@ import Navbar from './Navbar';
 import TypeWriter from 'react-typewriter';
 import Timer from './Timer';
 
-import { captureUserMedia, takePhoto, uploadImage, uploadAudio } from './AppUtils';
+import { captureUserMedia, takePhoto, uploadImage, uploadAudio, mergeAndAnalyze } from './AppUtils';
 import RecordRTC from 'recordrtc';
 const StereoAudioRecorder = RecordRTC.StereoAudioRecorder;
 
@@ -27,12 +27,6 @@ class Behavioral extends React.Component {
     this.nextQuestion = this.nextQuestion.bind(this);
     this.index = 0;
   }
-  // timer(minTime){
-  //   this.setState({minTime: minTime})
-  //     setInterval(() => {
-
-  //     }, 1000);
-  // }
 
   componentDidMount() {
     this.setState({userId: '1234'});
@@ -98,7 +92,6 @@ class Behavioral extends React.Component {
   startRecord() {
     this.setState({isRecording: true})
     setTimeout(() => {
-      console.log('YOYOYO');
       this.setState({ time: 2 });
     }, 3000)
     // start recording audio
@@ -120,7 +113,7 @@ class Behavioral extends React.Component {
     this.state.recordAudio.stopRecording(() => {
       console.log('Stop recording audio');
 
-      uploadAudio(this.state.recordAudio.blob, this.state.userId);
+      uploadAudio(this.state.recordAudio.blob, this.state.userId, this.index - 1);
       // console.log(this.state.recordAudio.blob);
       // console.log(this.state.recordAudio);
       temp();
@@ -158,6 +151,11 @@ class Behavioral extends React.Component {
   timerEnd() {
     console.log('TIMER END');
     this.nextQuestion(); // force next question
+  }
+
+
+  callMerge() {
+    mergeAndAnalyze(this.state.userId);
   }
 
   nextQuestion() {
@@ -206,9 +204,14 @@ class Behavioral extends React.Component {
       this.state.stream.getVideoTracks().forEach(function(track) {
         track.stop();
       });
+
+      // now that behavioral is over, can merge audio
+      this.callMerge();
+
       this.props.history.push('/technical');
     }
   }
+
 
   componentWillMount() {
     setTimeout(() => {

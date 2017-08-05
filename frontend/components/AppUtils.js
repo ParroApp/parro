@@ -32,10 +32,10 @@ export function uploadImage(photoEncoding, userId) {
   });
 };
 
-export function uploadAudio(audioBlob, userId) {
+export function uploadAudio(audioBlob, userId, questionNum) {
   var formData = new FormData();
   console.log(audioBlob);
-  formData.append('audio', audioBlob, `${new Date().toISOString()}-${userId}.wav`);
+  formData.append('audio', audioBlob, `Q${questionNum}_${userId}_${new Date().toISOString()}.wav`);
 
   axios.post('/upload_audio', formData)
   .then(function(res) {
@@ -45,6 +45,16 @@ export function uploadAudio(audioBlob, userId) {
     console.log('ERROR', err);
   });
 };
+
+export function mergeAndAnalyze(userId) {
+  axios.post('/merge', { userId: userId })
+  .then(function(res) {
+    console.log('RESULT OF MERGE', res);
+  })
+  .catch(function(err) {
+    console.log('ERROR', err);
+  });
+}
 
 function dataURItoBlob(dataURI) {
   var byteString = atob(dataURI.split(',')[1]);
