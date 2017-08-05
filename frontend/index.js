@@ -3,7 +3,6 @@ import { render } from 'react-dom';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 import App from './containers/AppContainer'
-// import Recorder from './components/Recorder';
 import { BrowserRouter, Route, Link } from 'react-router-dom'
 import rootReducer from './reducers/index';
 import Analytics from './components/Analytics';
@@ -16,6 +15,7 @@ import Technical from './components/Technical';
 import End from './components/End';
 import Timer from './components/Timer';
 import Question from './components/Question';
+import Landing from './components/Landing';
 
 import 'bulma/css/bulma.css';
 
@@ -27,7 +27,7 @@ render(
   <Provider store={store}>
     <BrowserRouter>
       <div>
-        <Route path='/home' component={AppContainer} />
+        <Route path='/home' component={Landing} />
         <Route path='/end' component={End} />
         <Route path='/technical' component={Technical} />
         <Route path='/behavioral' component={Behavioral} />
