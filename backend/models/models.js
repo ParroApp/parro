@@ -78,13 +78,34 @@ var UserSchema = new Schema({
   },
 })
 
+var InterviewSchema = new Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true
+  },
+  behavioral: {
+    type: String,
+    required: true
+  },
+  technical: {
+    type: String,
+    required: true
+  }
+})
+
 
 var Company = mongoose.model('Company', CompanySchema)
 var Question = mongoose.model('Question', QuestionSchema)
 var User = mongoose.model('User', UserSchema)
+var Interview = mongoose.model('Interview', InterviewSchema)
 
 module.exports = {
   Company: Company,
   Question: Question,
-  User: User
+  User: User,
+  Interview: Interview
 };

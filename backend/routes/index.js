@@ -43,14 +43,14 @@ module.exports = function() {
   router.post('/send/demo/email', function(req, res) {
     var { name, email } = req.body;
 
-    new User({
+    new Interview({
       name, email
     }).save()
-    .then(user => {
-      res.json(user);
+    .then(interview => {
+      res.json(interview);
     })
     .catch(err => {
-      res.json(user);
+      res.json(interview);
     })
 
   });
