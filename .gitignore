@@ -57,9 +57,7 @@ typings/
 *.DS_Store
 
 # dotenv environment variables file
-env.sh
+.env
+
+# Webpack build files
 build/*
-backend/uploads/models/*
-backend/uploads/pics/*
-backend/uploads/windows/*
-uploads/*

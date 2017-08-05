@@ -1,109 +1,97 @@
-const path = require('path');
-const express = require('express');
-const app = express();
-const PORT = process.env.PORT || 3000;
-const multer = require('multer');
-const bodyParser = require('body-parser')
-const audioAnalytics = require('./backend/audioAnalytics.js');
-var Question = require('./backend/models/models').Question;
-var _axios = require('axios');
+'use strict';
 
+/**
+ * Ensure that all environment variables are configured.
+ */
 
-var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, './backend/uploads/pics')
+import _ from './env';
+
+[
+  'AWS_ACCESS_KEY_ID',
+  'AWS_SECRET_ACCESS_KEY',
+  'MONGODB_URI',
+  'S3_BUCKET'
+].forEach(varName => {
+  if (!process.env.hasOwnProperty(varName)) {
+    throw new Error('Missing environment variable: ' + varName);
   }
-})
-
-const upload = multer({ storage: storage })
-
-
-const routes = require('./backend/routes/index');
-
-var mongoose = require('mongoose');
-const connect = 'mongodb://test:test@ds129013.mlab.com:29013/angelhack2017';
-mongoose.connect(connect);
-
-app.use(bodyParser.json());
-
-app.post('/run_code', function(req, res) {
-  var questionId = req.body.questionId;
-  var code = req.body.code;
-  console.log('code', code);
-  var language = req.body.language;
-  Question.findById(questionId)
-  .then(foundQuestion => {
-    console.log('foundQuestion', foundQuestion);
-    var inputArr = foundQuestion.inputArr;
-    var outputArr = foundQuestion.outputArr;
-    var answerArr = [];
-    var token = 'cd23c271-8018-420f-a556-f92402987134';
-    var axios = _axios.create({
-      headers: {
-        Authorization: 'Token ' + token
-      }
-    })
-    console.log('INPUTARRONE', inputArr);
-    inputArr.forEach(function(input) {
-      console.log('INPUT', input);
-      answerArr.push(axios.post('https://run.glot.io/languages/javascript/latest', {
-        files: [
-          {
-            name: "main.js",
-            content: code + ';\n console.log(solve("'+ input +'"))'
-          },
-        ]
-      }).then(function(response) {
-        return response.data;
-      }).catch(function(err) {
-        return err;
-      }))
-    });
-    console.log('INPUT ARR', inputArr);
-    Promise.all(answerArr)
-    .then(function(resolvedArr) {
-      console.log('RESOLVED ARR', resolvedArr);
-      var status = {success: true, message: 'You got it right!'}
-      resolvedArr.forEach(function(data, index) {
-        var output = data.stdout.trim();
-        console.log(output);
-        console.log(outputArr);
-        if (output !== outputArr[index]) {
-          status = {success: false, message: data.stderr || 'Your output did not match what we expected.'}
-        }
-      })
-      res.json(status);
-    })
-  })
 });
 
-app.use('/', routes());
+/**
+ * Database setup.
+ */
+
+import mongoose from 'mongoose';
+
+mongoose.Promise = global.Promise;
+mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
+
+/**
+ * Module dependencies.
+ */
+
+import path from 'path';
+import express from 'express';
+import multer from 'multer';
+import bodyParser from 'body-parser';
+
+/**
+ * Initialize express server.
+ */
+
+const app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+
+/**
+ * Initialize static files and routes.
+ */
 
 app.use('/assets', express.static(path.join(__dirname, 'public')));
 app.use('/build', express.static(path.join(__dirname, 'build')));
 
-app.post('/upload_image', upload.single('image'), function (req, res, next) {
-  console.log(req.file);
-  res.send({ success: true });
-});
+import routes from './backend/routes';
+app.use('/', routes);
 
-var count =0;
-app.post('/upload_audio', upload.single('audio'), function (req, res, next) {
-  console.log('AUDIO');
-  console.log(req.file);
-  res.send();
-  audioAnalytics('./backend/uploads/pics/' + req.file.filename, (result) => {
-    // res.json(result);
-    console.log(result);
+/**
+ * Development error handler.
+ * Will print stacktrace.
+ */
+
+if (app.get('env') === 'development') {
+  app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(err.status || 500);
+    res.send('Error: ' + err.message + '\n' + err);
   });
+}
+
+/**
+ * Production error handler.
+ * No stacktraces leaked to user.
+ */
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.status || 500);
+  res.send('Error: ' + err.message);
 });
 
-app.get('/*', (request, response) => {
-    response.sendFile(__dirname + '/public/index.html'); // For React/Redux
+/**
+ * Render home page and let React Router handle the remaining routes.
+ */
+
+app.get('/*', (req, res) => {
+  res.sendFile(path.join(__dirname, '/public/index.html'));
 });
 
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, error => {
-    error
-    ? console.error(error)
-    : console.info(`==> 🌎 Listening on port ${PORT}. Visit http://localhost:${PORT}/ in your browser.`);
+  error
+  ? console.error(error)
+  : console.info(`Parro Server listening on port ${PORT}.`);
 });
