@@ -19,8 +19,12 @@ class BusinessLanding extends React.Component {
   }
   onSubmit() {
     console.log('SENDING', this.state.name, this.state.email);
-    if (this.state.name.trim().length > 0 && this.state.email.trim().length > 0) {
+    if (this.state.name.trim().length > 0 && this.state.email.trim().length > 0 && this.state.email.indexOf('@') !== -1) {
       this.setState({open: false, complete: true});
+      axios.post('/send/demo/email', {
+        name: this.state.name,
+        email: this.state.email
+      })
     } else {
       this.setState({error: true})
     }

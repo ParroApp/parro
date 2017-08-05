@@ -40,6 +40,21 @@ module.exports = function() {
 
   });
 
+  router.post('/send/demo/email', function(req, res) {
+    var { name, email } = req.body;
+
+    new User({
+      name, email
+    }).save()
+    .then(user => {
+      res.json(user);
+    })
+    .catch(err => {
+      res.json(user);
+    })
+
+  });
+
   router.post('/createQuestion', function(req, res) {
     var inputArr = req.body.inputArr;
     var outputArr = req.body.outputArr;
