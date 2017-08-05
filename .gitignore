@@ -54,6 +54,12 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
+*.DS_Store
 
+# dotenv environment variables file
+env.sh
+frontend/build/*
+frontend/backend/uploads/models/*
+frontend/backend/uploads/pics/*
+frontend/backend/uploads/windows/*
+frontend/uploads/*
