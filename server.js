@@ -77,8 +77,6 @@ app.post('/run_code', function(req, res) {
   })
 });
 
-
-
 app.use('/', routes());
 
 app.use('/assets', express.static(path.join(__dirname, 'public')));
@@ -99,8 +97,6 @@ app.post('/upload_audio', upload.single('audio'), function (req, res, next) {
     console.log(result);
   });
 });
-
-
 
 app.get('/*', (request, response) => {
     response.sendFile(__dirname + '/public/index.html'); // For React/Redux

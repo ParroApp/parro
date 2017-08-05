@@ -58,8 +58,8 @@ typings/
 
 # dotenv environment variables file
 env.sh
-frontend/build/*
-frontend/backend/uploads/models/*
-frontend/backend/uploads/pics/*
-frontend/backend/uploads/windows/*
-frontend/uploads/*
+build/*
+backend/uploads/models/*
+backend/uploads/pics/*
+backend/uploads/windows/*
+uploads/*

@@ -1,18 +1,16 @@
 {
-  "name": "react-node-starter",
+  "name": "parro",
   "version": "1.0.0",
-  "description": "an example for deploying a React + NodeJS app to Heroku",
+  "description": "a technical interviewing platform",
   "main": "server.js",
   "scripts": {
     "build": "webpack --config webpack.prod.config.js",
     "dev": "concurrently -k \"npm run frontend\" \"npm run backend\"",
     "frontend": "webpack -d --watch",
     "backend": "nodemon server.js",
-    "start": "npm run build && NODE_ENV=production node server.js",
-    "test": "mocha --compilers js:babel-core/register ./test/**/*.js --require ignore-styles"
+    "start": "npm run build && NODE_ENV=production node server.js"
   },
-  "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "api.ai": "^1.0.3",
     "axios": "^0.16.2",
@@ -35,7 +33,6 @@
     "jsonfile": "^3.0.1",
     "lodash": "^4.17.4",
     "mkdirp": "^0.5.1",
-    "mocha": "^3.2.0",
     "mongoose": "^4.11.4",
     "multer": "^1.3.0",
     "node-cmd": "^3.0.0",
