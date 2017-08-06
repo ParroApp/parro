@@ -299,8 +299,50 @@ router.get('/api/status', (req, res) => {
   })
   .then(session => {
     res.json({
+      name: session.name,
       status: session.status,
-      name: session.name
+      next_status: 'behavioral'
+    })
+    console.log(session);
+  })
+  .catch(err => {
+    res.status(403).json({ error: 'Internal server error.' });
+  })
+});
+
+router.get('/api/behavioral', (req, res) => {
+  req.checkQuery('sid', 'Invalid sid.').notEmpty().isAlphanumeric();
+
+  req.getValidationResult()
+  .then(function(result) {
+    if (!result.isEmpty()) {
+      console.log(result.array());
+      throw new Error;
+    }
+    return Interview.findOne({ sessionId: req.query.sid })
+  })
+  .then(session => {
+    if (!session) {// || session.next_status !== 'behavioral') {
+      console.log('Empty session');
+      throw new Error;
+    }
+    if (session.status === 'visited') {
+      session.status = 'behavioral';
+      return session.save();
+    }
+    // only update next status when audio is submitted
+    return session;
+  })
+  .then(session => {
+    res.json({
+      session: {
+        name: session.name,
+        status: session.status,
+        next_status: 'behavioral'
+      },
+      behavioral: {
+        message: 'Tell me about yourself'
+      }
     })
     console.log(session);
   })

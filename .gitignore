@@ -61,3 +61,4 @@ typings/
 
 # Webpack build files
 build/*
+public/bundle.js

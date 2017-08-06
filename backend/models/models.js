@@ -106,7 +106,7 @@ const Interview = mongoose.model('Interview', {
     required: true,
     default: 'received'
   },
-  state: String,
+  state: String, // Current question
   startTime: Date,
   behavioral: String,
   technical: String

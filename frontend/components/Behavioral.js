@@ -12,28 +12,17 @@ const hasGetUserMedia = !!(navigator.getUserMedia || navigator.webkitGetUserMedi
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { getAndVerifySession, redirect } from '../actions';
+import * as actions from '../actions';
 
 import speak from './Speak';
 import ParroBot from './ParroBot';
 
 
+// show parro first, if current status === visited , show landing page
+// if current status === behavioral, show behavioral
 class Behavioral extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      recordVideo: '',
-      doneTyping: false,
-      isRecording: false,
-      isBotAsking: true,
-      minTime: 0,
-      secTime: 0,
-      typewriter: '',
-      time: null
-    }
-    // this.startRecording = this.startRecording.bind(this);
-    this.nextQuestion = this.nextQuestion.bind(this);
-    this.index = 0;
   }
 
   componentWillMount() {
@@ -48,12 +37,39 @@ class Behavioral extends React.Component {
     this.props.getAndVerifySession(query.sid);
   }
 
+  componentDidMount() {
+    // BUILDUP
+    // The Web Speech API may mount without its voices loaded, making any
+    // on-mount speech fail.
+    window.speechSynthesis.onvoiceschanged = () => {
+      this.forceUpdate()
+    };
+  }
 
-  // componentDidMount() {
-    // setTimeout(() => {
-    //   this.setState({doneTyping: true})
-    // }, 10000)
-  // }
+  componentWillUnmount() {
+    // TEARDOWN
+    // We need to do unmount cleanup, to ensure that our queue is emptied
+    // when the component is removed.
+    window.speechSynthesis.cancel();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    console.log('RECEIVING PROPS', nextProps);
+    if (nextProps.session.status === 'visited') { // Have not started
+      // captureUserMedia((stream) => {
+      //   this.setState({ stream: stream, src: window.URL.createObjectURL(stream) });
+      // });
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    // We also need to decide when to invoke the speech method. This was
+    // hooked into our component lifecycle automatically, but no longer is.
+    if (prevProps.speak.message !== this.props.speak.message && this.props.speak.message) {
+      speak(this.props.speak.message);
+    }
+  }
+
 
   startRecordVideo() {
     // start recording video
@@ -109,61 +125,9 @@ class Behavioral extends React.Component {
     this.setState({isRecording: false});
   }
 
-  componentDidMount() {
-    // BUILDUP
-    // The Web Speech API may mount without its voices loaded, making any
-    // on-mount speech fail.
-    window.speechSynthesis.onvoiceschanged = () => {
-      this.forceUpdate()
-    };
-  }
 
-  componentWillUnmount() {
-    // TEARDOWN
-    // We need to do unmount cleanup, to ensure that our queue is emptied
-    // when the component is removed.
-    window.speechSynthesis.cancel();
-  }
 
-  componentWillReceiveProps(nextProps) {
-    console.log('RECEIVING PROPS', nextProps);
-    if (nextProps.session.status === 'visited') { // Have not started
-    // captureUserMedia((stream) => {
-    //   this.setState({ stream: stream, src: window.URL.createObjectURL(stream) });
-    // });
-    }
-  }
 
-  componentDidUpdate(prevProps, prevState) {
-    // We also need to decide when to invoke the speech method. This was
-    // hooked into our component lifecycle automatically, but no longer is.
-    if (prevProps.speak !== this.props.speak && this.props.speak) {
-      speak(this.props.speak);
-    }
-  }
-
-  talk(val) {
-    setTimeout(function() {
-      var synth = window.speechSynthesis;
-      var voices = synth.getVoices();
-      for (var i = 0; i < voices.length; i++) {
-          if (voices[i].name === 'Google US English') {
-              voices = voices[i];
-              break;
-          }
-      }
-
-      var msg = new SpeechSynthesisUtterance();
-      msg.text = val;
-      msg.voice = voices;
-      msg.pitch = 1;
-      msg.rate = 0.9;
-      synth.speak(msg);
-      this.setState({
-        typewriter: val
-      });
-    }.bind(this), 500);
-  }
 
   startRecording() {
     this.nextQuestion();
@@ -171,7 +135,7 @@ class Behavioral extends React.Component {
 
   timerEnd() {
     console.log('TIMER END');
-    this.nextQuestion(); // force next question
+  //   this.nextQuestion(); // force next question
   }
 
 
@@ -186,21 +150,21 @@ class Behavioral extends React.Component {
     // }, 3000)
     console.log('next question');
     console.log('start recording here', this.state);
-    if (!this.state.recordVideo) {
-      this.startRecordVideo();
-    }
-    if (this.state.isRecording) {
-      console.log('stop audio recording old and upload...');
-      this.stopRecord(() => {
-        this.startRecord();
-      });
-      // this.state.stream.getVideoTracks().forEach(function(track) {
-      //   track.stop();
-      // });
-      // stop recording and restart...
-    } else {
-      this.startRecord();
-    }
+    // if (!this.state.recordVideo) {
+    //   this.startRecordVideo();
+    // }
+    // if (this.state.isRecording) {
+    //   console.log('stop audio recording old and upload...');
+    //   this.stopRecord(() => {
+    //     this.startRecord();
+    //   });
+    //   // this.state.stream.getVideoTracks().forEach(function(track) {
+    //   //   track.stop();
+    //   // });
+    //   // stop recording and restart...
+    // } else {
+    //   this.startRecord();
+    // }
 
     this.setState({ doneTyping: false });
     this.index++;
@@ -212,62 +176,83 @@ class Behavioral extends React.Component {
       this.talk('What is bubble sort?');
     } else {
       // END OF BEHAVIORAL SECTION
-      this.state.recordVideo.stopRecording(() => {
-        console.log('Stop recording video');
-        let params = {
-          type: 'video/webm',
-          data: this.state.recordVideo.blob,
-          id: Math.floor(Math.random() * 90000) + 10000
-        }
-        clearInterval(this.state.intervalId);
-        this.setState({ uploading: true, intervalId: null, time: '' });
-      });
-      this.state.stream.getVideoTracks().forEach(function(track) {
-        track.stop();
-      });
+      // this.state.recordVideo.stopRecording(() => {
+      //   console.log('Stop recording video');
+      //   let params = {
+      //     type: 'video/webm',
+      //     data: this.state.recordVideo.blob,
+      //     id: Math.floor(Math.random() * 90000) + 10000
+      //   }
+      //   clearInterval(this.state.intervalId);
+      //   this.setState({ uploading: true, intervalId: null, time: '' });
+      // });
+      // this.state.stream.getVideoTracks().forEach(function(track) {
+      //   track.stop();
+      // });
 
       // now that behavioral is over, can merge audio
-      this.callMerge();
+      // this.callMerge();
+      alert('done');
+      // this.props.history.push('/technical');
+    }
+  }
 
-      this.props.history.push('/technical');
+  onTypingEnd() {
+    this.props.showBehavioralButton();
+    if (this.props.session.status !== 'visited') {
+      this.props.startTimer(2);
+    }
+  }
+
+  buttonOnClick() {
+    console.log(this.props.speak.action);
+    if (this.props.session.next_status === 'behavioral') {
+      this.props.getBehavioral();
+    } else { // technical
+      alert('done');
     }
   }
 
   render() {
+    const { behavioral, speak, timer, session } = this.props;
+
     return(
       <div>
         {!this.props.session.status && <div>Loading...</div>}
         <Navbar {...this.props}/>
-          <video autoPlay muted src={this.state.src} style={{display: 'none'}}/>
+          {/*<video autoPlay muted src={this.state.src} style={{display: 'none'}}/>*/}
           <div style={{height: '60px', width: '100%'}}></div>
           <ParroBot />
         <div className="container" style={{textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
           <div className="columns">
             <div className="column is-vertical">
-              {this.props.speak && <TypeWriter fixed={true} style={{fontSize: '30px', textAlign: 'center'}} typing={1} initDelay={0}>
-                {this.props.speak}
-              </TypeWriter>}
-              {this.state.time && <Timer time={this.state.time} timerEnd={this.timerEnd.bind(this)} />}
               {
-                this.state.isBotDone && (<span>{this.state.minTime + ':' + this.state.secTime}</span>)
+                this.props.speak &&
+                <TypeWriter onTypingEnd={this.onTypingEnd.bind(this)} fixed={true} style={{fontSize: '30px', textAlign: 'center'}} typing={1} initDelay={0}>
+                  {this.props.speak.message}
+                </TypeWriter>
               }
+              {timer && <Timer time={timer} timerEnd={this.timerEnd.bind(this)} />}
           </div>
           </div>
           </div>
           {
-            this.state.doneTyping &&
-            (<button onClick={this.nextQuestion} style={{position: 'absolute', top: '80%', left: '45.5%'}} className="button is-primary is-large">
+            behavioral.showButton &&
+            session.status === 'visited' &&
+            session.next_status === 'behavioral' &&
+            <button onClick={this.buttonOnClick.bind(this)} style={{position: 'absolute', top: '80%', left: '45.5%'}} className="button is-primary is-large">
               Let's Begin
-            </button>)
+            </button>
           }
           {
-            this.state.isRecording &&
-            (<button onClick={this.nextQuestion} style={{position: 'absolute', top: '80%', left: '46.5%'}} className="button is-success is-large">
+            behavioral.showButton &&
+            session.status === 'behavioral' &&
+            <button onClick={this.buttonOnClick.bind(this)} style={{position: 'absolute', top: '80%', left: '46.5%'}} className="button is-success is-large">
               <span className="icon">
                 <i className="fa fa-arrow-right"></i>
               </span>
               <span>Next</span>
-            </button>)
+            </button>
           }
       </div>
     )
@@ -278,12 +263,14 @@ const mapStateToProps = (state) => {
   return {
     session: state.session,
     sid: state.sid,
-    speak: state.speak
+    speak: state.speak,
+    behavioral: state.behavioral,
+    timer: state.timer
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ getAndVerifySession, redirect }, dispatch);
+  return bindActionCreators(actions, dispatch);
 };
 
 export default connect(
