@@ -6,7 +6,7 @@ import multer from 'multer';
 import nodemailer from 'nodemailer';
 import aws from 'aws-sdk';
 import audioAnalytics from '../audioAnalytics';
-import { Company, Question } from '../models/models';
+import { Company, Question, Interview } from '../models/models';
 var ffmpeg = require('fluent-ffmpeg');
 const router = express.Router();
 const upload = multer();
@@ -123,7 +123,7 @@ router.post('/run_code', function(req, res) {
     var outputArr = foundQuestion.outputArr;
     var answerArr = [];
     var token = 'cd23c271-8018-420f-a556-f92402987134';
-    var axios = _axios.create({
+    var _axios = axios.create({
       headers: {
         Authorization: 'Token ' + token
       }
@@ -131,7 +131,7 @@ router.post('/run_code', function(req, res) {
     console.log('INPUTARRONE', inputArr);
     inputArr.forEach(function(input) {
       console.log('INPUT', input);
-      answerArr.push(axios.post('https://run.glot.io/languages/javascript/latest', {
+      answerArr.push(_axios.post('https://run.glot.io/languages/javascript/latest', {
         files: [
           {
             name: "main.js",
@@ -270,6 +270,79 @@ router.get('/sendEmail', function(req, res) {
   sendEmail();
   res.send('done');
 })
+
+import validator from 'email-validator';
+
+// TEMPORARY ROUTES
+// retrieves the current state
+router.get('/api/status', (req, res) => {
+  req.checkQuery('sid', 'Invalid sid.').notEmpty().isAlphanumeric();
+
+  req.getValidationResult()
+  .then(function(result) {
+    if (!result.isEmpty()) {
+      console.log(result.array());
+      throw new Error;
+    }
+    return Interview.findOne({ sessionId: req.query.sid })
+  })
+  .then(session => {
+    if (!session) {
+      console.log('Empty session');
+      throw new Error;
+    }
+    if (session.status === 'received') {
+      session.status = 'visited';
+      return session.save();
+    }
+    return session;
+  })
+  .then(session => {
+    res.json({
+      status: session.status,
+      name: session.name
+    })
+    console.log(session);
+  })
+  .catch(err => {
+    res.status(403).json({ error: 'Internal server error.' });
+  })
+});
+// 2a29f7afeeab715260ef393c48147765d9f7521b817dac18cac23455c5f9a089e98b8850b464c79a61a9c9ea5fe9eaa0c80833b1d2f3f7ef365bb09b48a5f081
+
+router.use('/api', (req, res) => {
+  res.status(403).json({ error: 'Invalid params.' });
+});
+
+router.get('/trigger_email', (req, res) => {
+  if (!req.query.name || !req.query.email) {
+    res.status(403).json({ error: 'Missing fields.' });
+    return;
+  }
+
+  const name = req.query.name;
+  const email = req.query.email;
+  if (name.trim().length < 3) {
+    res.status(403).json({ error: 'Invalid name format.' });
+    return;
+  }
+  if (!validator.validate(email)) {
+    res.status(403).json({ error: 'Invalid email format.' });
+    return;
+  }
+
+  const interview = new Interview({ name, email });
+  interview.save()
+  .then(function(saved) {
+    console.log(saved);
+    // TODO: send email
+    res.json(saved);
+  })
+  .catch(function(err) {
+    console.log(err);
+    res.status(500).json({ error: 'Error.' });
+  });
+});
 
 var sendEmail = function(somedata){
   var smtpConfig = {

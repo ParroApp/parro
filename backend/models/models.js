@@ -1,7 +1,9 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+'use strict';
 
-var CompanySchema = new Schema ({
+import mongoose from 'mongoose';
+import crypto from 'crypto';
+
+const Company = mongoose.model('Company', {
   name: {
     type: String,
     required: true
@@ -23,11 +25,11 @@ var CompanySchema = new Schema ({
     required: true
   },
   techQ1: {
-    type: Schema.ObjectId,
+    type: mongoose.Schema.ObjectId,
     ref: 'Question'
   },
   techQ2: {
-    type: Schema.ObjectId,
+    type: mongoose.Schema.ObjectId,
     ref: 'Question'
   },
   companyCulture: {
@@ -56,7 +58,7 @@ var CompanySchema = new Schema ({
   }
 })
 
-var QuestionSchema = new Schema ({
+const Question = mongoose.model('Question', {
   question: {
     type: String,
     required: true
@@ -69,16 +71,21 @@ var QuestionSchema = new Schema ({
     type: Array,
     required: true
   }
-});
+})
 
-var UserSchema = new Schema({
+const User = mongoose.model('User', {
   data: {
     type: Object,
     require: true
-  },
+  }
 })
 
-var InterviewSchema = new Schema({
+const Interview = mongoose.model('Interview', {
+  sessionId: {
+    type: String,
+    required: true,
+    default: crypto.randomBytes(64).toString('hex')
+  },
   name: {
     type: String,
     required: true
@@ -87,25 +94,22 @@ var InterviewSchema = new Schema({
     type: String,
     required: true
   },
-  behavioral: {
+  status: {
     type: String,
-    required: true
+    enum: [
+      'received', // Link sent out to candidate
+      'visited', // Candidate visited link
+      'behavioral', // Candidate started on behavioral
+      'technical', // Candidate started on technical
+      'completed' // Candidate completed interview
+    ],
+    required: true,
+    default: 'received'
   },
-  technical: {
-    type: String,
-    required: true
-  }
-})
+  state: String,
+  startTime: Date,
+  behavioral: String,
+  technical: String
+});
 
-
-var Company = mongoose.model('Company', CompanySchema)
-var Question = mongoose.model('Question', QuestionSchema)
-var User = mongoose.model('User', UserSchema)
-var Interview = mongoose.model('Interview', InterviewSchema)
-
-module.exports = {
-  Company: Company,
-  Question: Question,
-  User: User,
-  Interview: Interview
-};
+module.exports = { Company, Question, User, Interview };

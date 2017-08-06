@@ -10,7 +10,9 @@ import _ from './env';
   'AWS_ACCESS_KEY_ID',
   'AWS_SECRET_ACCESS_KEY',
   'MONGODB_URI',
-  'S3_BUCKET'
+  'S3_BUCKET',
+  'WATSON_USERNAME',
+  'WATSON_PASSWORD'
 ].forEach(varName => {
   if (!process.env.hasOwnProperty(varName)) {
     throw new Error('Missing environment variable: ' + varName);
@@ -34,6 +36,7 @@ import path from 'path';
 import express from 'express';
 import multer from 'multer';
 import bodyParser from 'body-parser';
+import expressValidator from 'express-validator';
 
 /**
  * Initialize express server.
@@ -42,6 +45,7 @@ import bodyParser from 'body-parser';
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(expressValidator());
 
 /**
  * Initialize static files and routes.
